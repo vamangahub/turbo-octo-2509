@@ -1,0 +1,29 @@
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+
+# Install Python
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 python3-pip git && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-download model weights (set HF_TOKEN at build time for gated models)
+ARG HF_TOKEN
+ENV HF_TOKEN=${HF_TOKEN}
+RUN python3 -c "\
+from huggingface_hub import snapshot_download; \
+import os; \
+token = os.environ.get('HF_TOKEN'); \
+snapshot_download('Qwen/Qwen2.5-VL-7B-Instruct', token=token); \
+" || echo "Model pre-download skipped (set HF_TOKEN build arg for gated models)"
+
+COPY handler.py .
+
+CMD ["python3", "handler.py"]

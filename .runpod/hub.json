@@ -1,0 +1,17 @@
+{
+  "title": "Qwen Image Editor",
+  "description": "Image editing with Qwen model and LoRA adapters",
+  "type": "serverless",
+  "category": "image",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 30,
+    "env": [
+      {
+        "key": "HF_TOKEN",
+        "description": "HuggingFace access token for model download",
+        "required": true
+      }
+    ]
+  }
+}
